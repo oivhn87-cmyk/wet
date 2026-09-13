@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Discord 自動配信テスト</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        textarea { width: 100%; height: 100px; margin-bottom: 10px; }
+        button { padding: 10px 20px; background: #5865F2; color: white; border: none; cursor: pointer; }
+        button:hover { background: #4752C4; }
+        #status { margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>Discord チャンネルへ自動配信</h2>
+    <p>下のボックスにメッセージを入力して送信ボタンを押すと、Discordに通知が飛びます。</p>
+
+    <label for="message">配信メッセージ:</label><br>
+    <textarea id="message" placeholder="ここにメッセージを入力..."></textarea><br>
+    
+    <button onclick="sendToDiscord()">Discordに送信する</button>
+    <div id="status"></div>
+
+    <script>
+        // 取得したDiscordのWebhook URLをここに貼り付けてください
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/あなたのWebhookURLをここに貼り付け';
+
+        async function sendToDiscord() {
+            const messageBox = document.getElementById('message');
+            const statusDiv = document.getElementById('status');
+            const text = messageBox.value;
+
+            if (!text.trim()) {
+                statusDiv.style.color = 'red';
+                statusDiv.innerText = 'メッセージを入力してください。';
+                return;
+            }
+
+            // Discord Webhookのペイロード（送信データ）
+            const payload = {
+                content: text,
+                username: "自動配信Bot", // Discord上で表示される名前
+            };
+
+            try {
+                statusDiv.style.color = 'black';
+                statusDiv.innerText = '送信中...';
+
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    statusDiv.style.color = 'green';
+                    statusDiv.innerText = '✅ 配信（送信）に成功しました！';
+                    messageBox.value = ''; // 入力欄をクリア
+                } else {
+                    throw new Error('サーバーからの応答がエラーです。');
+                }
+            } catch (error) {
+                statusDiv.style.color = 'red';
+                statusDiv.innerText = '❌ 送信に失敗しました: ' + error.message;
+            }
+        }
+    </script>
+
+</body>
+</html>
